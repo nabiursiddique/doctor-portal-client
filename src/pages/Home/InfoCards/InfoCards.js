@@ -25,7 +25,7 @@ const InfoCards = () => {
             name: "Contact us now",
             description: "+8801303741747",
             icon: phone,
-            bgClass: 'bg-gradient-to-r from-primary to-secondary'
+            bgClass: 'bg-gradient-to-r from-secondary to-primary'
         },
     ]
     return (
