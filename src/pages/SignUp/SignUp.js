@@ -1,13 +1,18 @@
 import React, { useContext, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { AuthContext } from '../../context/AuthProvider';
 import { toast } from 'react-hot-toast';
+import { GoogleAuthProvider } from 'firebase/auth';
 
 const SignUp = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const { createUser, updateUser } = useContext(AuthContext);
-    const [signUpError, setSignUpError] = useState('')
+    const { createUser, updateUser, googleSignIn } = useContext(AuthContext);
+    const [signUpError, setSignUpError] = useState('');
+    let navigate = useNavigate();
+    let location = useLocation();
+    let from = location.state?.form?.pathname || '/';
+
     const handleSignup = data => {
         console.log(data);
         setSignUpError('');
@@ -16,6 +21,7 @@ const SignUp = () => {
                 const user = result.user;
                 console.log(user);
                 toast.success('User created successfully');
+                navigate(from, { replace: true });
                 const userInfo = {
                     displayName: data.name
                 }
@@ -27,6 +33,19 @@ const SignUp = () => {
                 console.error(error);
                 setSignUpError(error.message)
             })
+    }
+
+    // Google sign up 
+    const googleProvider = new GoogleAuthProvider()
+    const googleProviderSignIn = () => {
+        googleSignIn(googleProvider)
+            .then(result => {
+                const user = result.user;
+                toast.success('Signup Successful');
+                navigate(from, { replace: true });
+                console.log(user);
+            })
+            .catch(error => console.log(error))
     }
     return (
         <div className='my-14 flex justify-center items-center'>
@@ -66,7 +85,7 @@ const SignUp = () => {
                 </form>
                 <p>Already have an account? <Link to='/login' className='text-secondary'>Please LogIn</Link></p>
                 <div className="divider">OR</div>
-                <button className="btn btn-outline w-full">CONTINUE WITH GOOGLE</button>
+                <button onClick={googleProviderSignIn} className="btn btn-outline w-full">CONTINUE WITH GOOGLE</button>
             </div>
         </div>
     );
