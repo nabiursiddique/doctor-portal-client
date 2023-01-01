@@ -1,10 +1,26 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthProvider';
 
 const Login = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const handleLogin = data => console.log(data)
+    const { signIn } = useContext(AuthContext);
+    const [loginError, setLoginError] = useState('')
+
+    const handleLogin = data => {
+        console.log(data);
+        setLoginError('');
+        signIn(data.email, data.password)
+            .then(result => {
+                const user = result.user;
+                console.log(user);
+            })
+            .catch(error => {
+                console.error(error.message);
+                setLoginError(error.message);
+            });
+    }
     return (
         <div className='my-14 flex justify-center items-center'>
             <div className=' p-7'>
@@ -23,6 +39,9 @@ const Login = () => {
                         <input type="password" {...register("password", { required: "Password is required", minLength: { value: 6, message: "Password must be at least 6 characters" } })} className="input input-bordered w-full max-w-xs" />
 
                         {errors.password && <p role="alert" className='text-red-600'>{errors.password?.message}</p>}
+                        <div>
+                            {loginError && <p className='text-red-600'>{loginError}</p>}
+                        </div>
 
                         <label className="label"><span className="label-text">Forget Password</span></label>
                     </div>
