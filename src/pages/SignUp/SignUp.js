@@ -4,14 +4,21 @@ import { useForm } from 'react-hook-form';
 import { AuthContext } from '../../context/AuthProvider';
 import { toast } from 'react-hot-toast';
 import { GoogleAuthProvider } from 'firebase/auth';
+import useToken from '../../hooks/useToken';
 
 const SignUp = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const { createUser, updateUser, googleSignIn } = useContext(AuthContext);
     const [signUpError, setSignUpError] = useState('');
+    const [createdUserEmail, setCreatedUserEmail] = useState('');
+    const [token] = useToken(createdUserEmail);
     let navigate = useNavigate();
     let location = useLocation();
     let from = location.state?.form?.pathname || '/';
+
+    if (token) {
+        navigate('/');
+    }
 
     const handleSignup = data => {
         console.log(data);
@@ -27,7 +34,7 @@ const SignUp = () => {
                 }
                 updateUser(userInfo)
                     .then(() => {
-                        navigate("/");
+                        saveUser(data.name, data.email);
                     })
                     .catch(error => console.error(error))
             })
@@ -36,6 +43,23 @@ const SignUp = () => {
                 setSignUpError(error.message)
             })
     }
+
+    const saveUser = (name, email) => {
+        const user = { name, email };
+        fetch('http://localhost:5000/users', {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(user)
+        })
+            .then(res => res.json())
+            .then(data => {
+                setCreatedUserEmail(email)
+            })
+    }
+
+
 
     // Google sign up 
     const googleProvider = new GoogleAuthProvider()

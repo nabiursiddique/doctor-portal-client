@@ -9,7 +9,11 @@ const MyAppointment = () => {
 
     const { data: bookings = [] } = useQuery({
         queryKey: ['bookings', user?.email],
-        queryFn: () => fetch(url)
+        queryFn: () => fetch(url, {
+            headers: {
+                authorization: `bearer ${localStorage.getItem('accessToken')}`
+            }
+        })
             .then(res => res.json())
     });
 
